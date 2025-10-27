@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Time Tracker - Employee Clock In/Out</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .btn-test {
+            background: #17a2b8;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .user-info-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .user-info-value {
+            color: #333;
+            text-align: right;
+        }
+
+        .status-indicator {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .status-clocked-out {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-clocked-in {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .time-display {
+            text-align: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .date-display {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-time {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .history-type {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .setup-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .setup-info p {
+            color: #004080;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .setup-info strong {
+            color: #003366;
+        }
+
+        .setup-info ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .setup-info li {
+            margin-bottom: 5px;
+            color: #004080;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .time-display {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="card">
+            <h1>⏰ Time Tracker</h1>
+            <p class="subtitle">Employee Clock In/Out System</p>
+            
+            <div class="setup-info">
+                <p><strong>📋 Smartsheet Setup Required:</strong></p>
+                <p>Your Smartsheet must have these exact column names:</p>
+                <ul>
+                    <li><strong>Employee Name</strong></li>
+                    <li><strong>Department</strong></li>
+                    <li><strong>Supervisor</strong></li>
+                    <li><strong>Action</strong></li>
+                    <li><strong>Timestamp</strong></li>
+                    <li><strong>Date</strong></li>
+                </ul>
+                <p>Get your API token from: Smartsheet → Account → Apps & Integrations → API Access</p>
+            </div>
+
+            <div class="form-group">
+                <label for="apiToken">Smartsheet API Token *</label>
+                <input type="password" id="apiToken" placeholder="Enter your API token" />
+            </div>
+
+            <div class="form-group">
+                <label for="sheetId">Sheet ID *</label>
+                <input type="text" id="sheetId" placeholder="Found in sheet URL" />
+                <small>Example: 1234567890123456</small>
+            </div>
+
+            <div class="form-group">
+                <label for="employeeName">Full Name *</label>
+                <input type="text" id="employeeName" placeholder="John Doe" />
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department *</label>
+                <input type="text" id="department" placeholder="Sales, IT, HR, etc." />
+            </div>
+
+            <div class="form-group">
+                <label for="supervisor">Supervisor Name *</label>
+                <input type="text" id="supervisor" placeholder="Jane Smith" />
+            </div>
+
+            <div id="setupAlert"></div>
+
+            <button class="btn btn-test" onclick="testConnection()" id="testBtn">
+                🔍 Test Connection
+            </button>
+            <button class="btn btn-primary" onclick="saveAccount()" id="saveBtn">
+                ✅ Create Account
+            </button>
+        </div>
+
+        <!-- Clock Screen -->
+        <div id="clockScreen" class="hidden">
+            <div class="card">
+                <h1>⏰ Time Tracker</h1>
+                
+                <div class="user-info">
+                    <div class="user-info-row">
+                        <span class="user-info-label">Name:</span>
+                        <span class="user-info-value" id="displayName"></span>
+                    </div>
+                    <div class="user-info-row">
+                        <span class="user-info-label">Department:</span>
+                        <span class="user-info-value" id="displayDept"></span>
+                    </div>
+                    <div class="user-info-row">
+                        <span class="user-info-label">Supervisor:</span>
+                        <span class="user-info-value" id="displaySuper"></span>
+                    </div>
+                </div>
+
+                <div class="date-display" id="dateDisplay"></div>
+                <div class="time-display" id="timeDisplay"></div>
+
+                <div id="statusIndicator" class="status-indicator status-clocked-out">
+                    Status: Clocked Out
+                </div>
+
+                <div id="clockAlert"></div>
+
+                <button id="clockInBtn" class="btn btn-success" onclick="clockIn()">
+                    🟢 Clock In
+                </button>
+                <button id="clockOutBtn" class="btn btn-danger hidden" onclick="clockOut()">
+                    🔴 Clock Out
+                </button>
+
+                <button class="btn btn-secondary" onclick="logout()">
+                    Change Account
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Recent Activity</h2>
+                <div id="historyList">
+                    <p class="subtitle">No activity yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage keys
+        const STORAGE_KEY = 'timeTrackerUser';
+        const CLOCK_STATUS_KEY = 'clockStatus';
+        const HISTORY_KEY = 'timeHistory';
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Time Tracker App Loaded');
+            const userData = getUserData();
+            if (userData) {
+                showClockScreen();
+                loadClockStatus();
+                loadHistory();
+            } else {
+                showSetupScreen();
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        function updateDateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateStr = now.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const timeDisplay = document.getElementById('timeDisplay');
+            const dateDisplay = document.getElementById('dateDisplay');
+            
+            if (timeDisplay) timeDisplay.textContent = timeStr;
+            if (dateDisplay) dateDisplay.textContent = dateStr;
+        }
+
+        async function testConnection() {
+            const apiToken = document.getElementById('apiToken').value.trim();
+            const sheetId = document.getElementById('sheetId').value.trim();
+            const testBtn = document.getElementById('testBtn');
+
+            if (!apiToken || !sheetId) {
+                showAlert('setupAlert', '⚠️ Please enter both API Token and Sheet ID', 'warning');
+                return;
+            }
+
+            testBtn.disabled = true;
+            testBtn.textContent = '🔄 Testing...';
+            showAlert('setupAlert', '🔄 Connecting to Smartsheet...', 'info');
+
+            try {
+                const response = await fetch(`https://api.smartsheet.com/2.0/sheets/${sheetId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    let errorMsg = '❌ <strong>Connection Failed</strong><br><br>';
+                    if (response.status === 401) {
+                        errorMsg += '• Invalid API token<br>• Double-check your token';
+                    } else if (response.status === 404) {
+                        errorMsg += '• Sheet not found<br>• Verify your Sheet ID';
+                    } else if (response.status === 403) {
+                        errorMsg += '• Access denied<br>• Sheet needs edit permissions';
+                    } else {
+                        errorMsg += `• Error ${response.status}: ${data.message || 'Unknown error'}`;
+                    }
+                    showAlert('setupAlert', errorMsg, 'error');
+                    testBtn.disabled = false;
+                    testBtn.textContent = '🔍 Test Connection';
+                    return;
+                }
+
+                const requiredColumns = ['Employee Name', 'Department', 'Supervisor', 'Action', 'Timestamp', 'Date'];
+                const existingColumns = data.columns.map(col => col.title);
+                const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
+
+                if (missingColumns.length > 0) {
+                    showAlert('setupAlert', 
+                        `⚠️ <strong>Missing Columns</strong><br><br>Add these to your sheet:<br><strong>${missingColumns.join(', ')}</strong>`, 
+                        'warning');
+                    testBtn.disabled = false;
+                    testBtn.textContent = '🔍 Test Connection';
+                    return;
+                }
+
+                showAlert('setupAlert', 
+                    `✅ <strong>Success!</strong><br><br>Sheet: <strong>${data.name}</strong><br>All columns found<br>Ready to create account`, 
+                    'success');
+                
+                testBtn.disabled = false;
+                testBtn.textContent = '✅ Connection OK';
+
+            } catch (error) {
+                showAlert('setupAlert', 
+                    `❌ <strong>Error</strong><br><br>${error.message}<br><br>Check:<br>• Internet connection<br>• API token<br>• Sheet ID`, 
+                    'error');
+                testBtn.disabled = false;
+                testBtn.textContent = '🔍 Test Connection';
+            }
+        }
+
+        async function saveAccount() {
+            const apiToken = document.getElementById('apiToken').value.trim();
+            const sheetId = document.getElementById('sheetId').value.trim();
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const department = document.getElementById('department').value.trim();
+            const supervisor = document.getElementById('supervisor').value.trim();
+            const saveBtn = document.getElementById('saveBtn');
+
+            if (!apiToken || !sheetId || !employeeName || !department || !supervisor) {
+                showAlert('setupAlert', '⚠️ Please fill in all fields', 'warning');
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = '🔄 Creating...';
+            showAlert('setupAlert', '🔄 Verifying and creating account...', 'info');
+
+            try {
+                const response = await fetch(`https://api.smartsheet.com/2.0/sheets/${sheetId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    showAlert('setupAlert', `❌ <strong>Error</strong><br><br>${data.message || 'Check credentials'}`, 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '✅ Create Account';
+                    return;
+                }
+
+                const sheetData = await response.json();
+                const requiredColumns = ['Employee Name', 'Department', 'Supervisor', 'Action', 'Timestamp', 'Date'];
+                const existingColumns = sheetData.columns.map(col => col.title);
+                const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
+
+                if (missingColumns.length > 0) {
+                    showAlert('setupAlert', 
+                        `❌ <strong>Missing columns:</strong><br>${missingColumns.join(', ')}`, 
+                        'error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '✅ Create Account';
+                    return;
+                }
+
+                const userData = {
+                    apiToken,
+                    sheetId,
+                    employeeName,
+                    department,
+                    supervisor,
+                    columnMap: {}
+                };
+
+                sheetData.columns.forEach(col => {
+                    userData.columnMap[col.title] = col.id;
+                });
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+                showAlert('setupAlert', '✅ <strong>Success!</strong><br>Account created', 'success');
+                
+                setTimeout(() => {
+                    showClockScreen();
+                }, 1500);
+
+            } catch (error) {
+                showAlert('setupAlert', `❌ <strong>Error:</strong><br>${error.message}`, 'error');
+                saveBtn.disabled = false;
+                saveBtn.textContent = '✅ Create Account';
+            }
+        }
+
+        function getUserData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function showSetupScreen() {
+            document.getElementById('setupScreen').classList.remove('hidden');
+            document.getElementById('clockScreen').classList.add('hidden');
+        }
+
+        function showClockScreen() {
+            const userData = getUserData();
+            if (!userData) return;
+
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('clockScreen').classList.remove('hidden');
+
+            document.getElementById('displayName').textContent = userData.employeeName;
+            document.getElementById('displayDept').textContent = userData.department;
+            document.getElementById('displaySuper').textContent = userData.supervisor;
+        }
+
+        async function clockIn() {
+            await performClockAction('Clock In', 'clockInBtn');
+        }
+
+        async function clockOut() {
+            await performClockAction('Clock Out', 'clockOutBtn');
+        }
+
+        async function performClockAction(action, buttonId) {
+            const userData = getUserData();
+            const now = new Date();
+            const button = document.getElementById(buttonId);
+            
+            const record = {
+                employeeName: userData.employeeName,
+                department: userData.department,
+                supervisor: userData.supervisor,
+                action: action,
+                timestamp: now.toLocaleString('en-US'),
+                date: now.toLocaleDateString('en-US')
+            };
+
+            button.disabled = true;
+            showAlert('clockAlert', `🔄 Processing ${action.toLowerCase()}...`, 'info');
+
+            try {
+                await sendToSmartsheet(record);
+                
+                localStorage.setItem(CLOCK_STATUS_KEY, JSON.stringify({
+                    status: action === 'Clock In' ? 'in' : 'out',
+                    time: now.toISOString()
+                }));
+                
+                updateClockStatus();
+                addToHistory(record);
+                showAlert('clockAlert', `✅ <strong>Success!</strong><br>${action} recorded`, 'success');
+                
+                setTimeout(() => {
+                    document.getElementById('clockAlert').innerHTML = '';
+                }, 3000);
+            } catch (error) {
+                showAlert('clockAlert', `❌ <strong>Error:</strong><br>${error.message}`, 'error');
+                button.disabled = false;
+            }
+        }
+
+        async function sendToSmartsheet(record) {
+            const userData = getUserData();
+            
+            if (!userData.columnMap || Object.keys(userData.columnMap).length === 0) {
+                const sheetResponse = await fetch(`https://api.smartsheet.com/2.0/sheets/${userData.sheetId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userData.apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!sheetResponse.ok) {
+                    throw new Error('Connection failed. Check credentials.');
+                }
+
+                const sheetData = await sheetResponse.json();
+                userData.columnMap = {};
+                sheetData.columns.forEach(col => {
+                    userData.columnMap[col.title] = col.id;
+                });
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+            }
+
+            const cells = [
+                { columnId: userData.columnMap['Employee Name'], value: record.employeeName },
+                { columnId: userData.columnMap['Department'], value: record.department },
+                { columnId: userData.columnMap['Supervisor'], value: record.supervisor },
+                { columnId: userData.columnMap['Action'], value: record.action },
+                { columnId: userData.columnMap['Timestamp'], value: record.timestamp },
+                { columnId: userData.columnMap['Date'], value: record.date }
+            ];
+
+            const response = await fetch(`https://api.smartsheet.com/2.0/sheets/${userData.sheetId}/rows`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userData.apiToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    toBottom: true,
+                    cells: cells
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to add row');
+            }
+
+            return await response.json();
+        }
+
+        function updateClockStatus() {
+            const statusData = localStorage.getItem(CLOCK_STATUS_KEY);
+            const status = statusData ? JSON.parse(statusData) : { status: 'out' };
+
+            const indicator = document.getElementById('statusIndicator');
+            const clockInBtn = document.getElementById('clockInBtn');
+            const clockOutBtn = document.getElementById('clockOutBtn');
+
+            if (status.status === 'in') {
+                indicator.className = 'status-indicator status-clocked-in';
+                indicator.textContent = 'Status: Clocked In';
+                clockInBtn.classList.add('hidden');
+                clockOutBtn.classList.remove('hidden');
+                clockOutBtn.disabled = false;
+            } else {
+                indicator.className = 'status-indicator status-clocked-out';
+                indicator.textContent = 'Status: Clocked Out';
+                clockInBtn.classList.remove('hidden');
+                clockOutBtn.classList.add('hidden');
+                clockInBtn.disabled = false;
+            }
+        }
+
+        function loadClockStatus() {
+            updateClockStatus();
+        }
+
+        function addToHistory(record) {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            history.unshift(record);
+            history = history.slice(0, 10);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="subtitle">No activity yet</p>';
+                return;
+            }
+
+            historyList.innerHTML = history.map(record => `
+                <div class="history-item">
+                    <div class="history-time">${record.timestamp}</div>
+                    <div class="history-type">${record.action}</div>
+                </div>
+            `).join('');
+        }
+
+        function showAlert(elementId, message, type) {
+            const alertEl = document.getElementById(elementId);
+            alertEl.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+
+        function logout() {
+            if (confirm('Change accounts? This will clear your info.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(CLOCK_STATUS_KEY);
+                showSetupScreen();
+            }
+        }
+    </script>
+</body>
+</html>
